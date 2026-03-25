@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Scan - Smart Diagnosis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-blue-100 via-white to-blue-200 flex items-center justify-center min-h-screen">
+
+  <div class="bg-white shadow-xl rounded-2xl p-10 w-full max-w-md">
+
+    <h1 class="text-3xl font-bold mb-4 text-gray-800 text-center">
+      Lung CT Scan Analysis
+    </h1>
+
+    <p class="text-gray-600 text-center mb-6">
+      Upload patient details and CT scan to detect lung cancer type,
+      visualize affected regions using Grad-CAM, and estimate cancer stage automatically.
+    </p>
+
+    <form action="/predict" method="post" enctype="multipart/form-data" class="space-y-5">
+
+      <!-- Patient Name -->
+      <div>
+        <label class="block text-gray-700 font-medium">Patient Name</label>
+        <input type="text" name="patient_name" required
+          class="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <!-- Age -->
+      <div>
+        <label class="block text-gray-700 font-medium">Age</label>
+        <input type="number" name="age" required
+          class="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+
+      <!-- Gender -->
+      <div>
+        <label class="block text-gray-700 font-medium">Gender</label>
+        <select name="gender" required
+          class="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="" disabled selected>Select Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </div>
+
+      <!-- Smoking -->
+      <div>
+        <label class="block text-gray-700 font-medium">Smoking History</label>
+        <select name="smoking" required
+          class="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="" disabled selected>Select Option</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+
+      <!-- Upload -->
+      <div>
+        <label class="block text-gray-700 font-medium">Upload Lung CT Scan</label>
+        <input type="file" name="scan" accept="image/*" required
+          class="w-full mt-2 text-sm text-gray-600">
+      </div>
+
+      <!-- Submit -->
+      <div class="text-center">
+        <button type="submit"
+          class="bg-blue-600 text-white px-8 py-2 rounded-full hover:bg-blue-700 transition">
+          Analyze Scan
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+
+</body>
+</html>

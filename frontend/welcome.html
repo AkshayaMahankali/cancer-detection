@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Diagnosis - Welcome</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-blue-100 via-white to-blue-200 flex items-center justify-center h-screen">
+
+  <div class="bg-white shadow-xl rounded-2xl p-10 text-center w-full max-w-lg">
+
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">
+      Smart Lung Cancer Diagnosis System
+    </h1>
+
+    <p class="text-gray-600 mb-6">
+      Upload lung CT scans to detect cancer type, visualize affected regions using
+      Grad-CAM, and estimate cancer stage based on tumor coverage analysis.
+    </p>
+
+    <div class="flex flex-col sm:flex-row justify-center gap-4">
+      <!-- Start Analysis -->
+      <a href="/analyze"
+         class="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition">
+         Start Analysis
+      </a>
+
+      <!-- Admin Login -->
+      <a href="/admin_login"
+         class="bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition">
+         Admin Login
+      </a>
+    </div>
+
+  </div>
+
+</body>
+</html>

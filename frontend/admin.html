@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Smart Diagnosis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Hover zoom effect for images */
+        .zoom:hover {
+            transform: scale(1.5);
+            transition: transform 0.3s ease;
+            z-index: 10;
+            position: relative;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-100 via-white to-green-100 min-h-screen py-10">
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Header with Logout -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800 drop-shadow-sm">
+            Admin Panel - Patient Records
+        </h1>
+        <a href="{{ url_for('admin_logout') }}"
+           class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
+           Logout
+        </a>
+    </div>
+
+    <div class="overflow-x-auto bg-white/90 shadow-lg rounded-2xl p-4 backdrop-blur-sm">
+
+        <table class="min-w-full divide-y divide-gray-300">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="px-4 py-2">ID</th>
+                    <th class="px-4 py-2">Name</th>
+                    <th class="px-4 py-2">Age</th>
+                    <th class="px-4 py-2">Gender</th>
+                    <th class="px-4 py-2">Smoking</th>
+                    <th class="px-4 py-2">Prediction</th>
+                    <th class="px-4 py-2">Confidence</th>
+                    <th class="px-4 py-2">Stage</th>
+                    <th class="px-4 py-2">Scan</th>
+                    <th class="px-4 py-2">Grad-CAM</th>
+                    <th class="px-4 py-2">Timestamp</th>
+                    <th class="px-4 py-2">Action</th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-200">
+            {% for patient in patients %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-2">{{ patient[0] }}</td>
+                <td class="px-4 py-2">{{ patient[1] }}</td>
+                <td class="px-4 py-2">{{ patient[2] }}</td>
+                <td class="px-4 py-2">{{ patient[3] }}</td>
+                <td class="px-4 py-2">{{ patient[4] }}</td>
+                <td class="px-4 py-2">{{ patient[7] }}</td>
+                <td class="px-4 py-2">{{ "%.2f"|format(patient[8]) }}%</td>
+                <td class="px-4 py-2 font-semibold text-blue-700">{{ patient[9] if patient[9] else "N/A" }}</td>
+                
+                <td class="px-4 py-2">
+                    {% if patient[5] %}
+                        <img src="{{ url_for('uploaded_file', filename=patient[5]) }}"
+                             alt="Scan" class="h-24 w-auto rounded-lg shadow-sm zoom">
+                    {% else %}
+                        <span class="text-gray-400">No Image</span>
+                    {% endif %}
+                </td>
+
+                <td class="px-4 py-2">
+                    {% if patient[6] %}
+                        <img src="{{ url_for('uploaded_file', filename=patient[6]) }}"
+                             alt="GradCAM" class="h-24 w-auto rounded-lg shadow-sm zoom">
+                    {% else %}
+                        <span class="text-gray-400">No Heatmap</span>
+                    {% endif %}
+                </td>
+
+                <td class="px-4 py-2">{{ patient[10] }}</td>
+
+                <td class="px-4 py-2">
+                    <form method="POST" action="{{ url_for('delete_patient', patient_id=patient[0]) }}">
+                        <button type="submit"
+                            onclick="return confirm('Are you sure you want to delete this patient?')"
+                            class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+</body>
+</html>
