@@ -13,7 +13,7 @@ import psycopg2
 # -----------------------------
 # Flask app
 # -----------------------------
-app = Flask(__name__, template_folder='../frontend')
+app = Flask(__name__)  # removed custom template path (use /templates)
 app.secret_key = os.environ.get("SECRET_KEY", "secret123")
 
 # -----------------------------
@@ -30,7 +30,7 @@ MODEL_URL = "https://drive.google.com/uc?id=1sq-Cz_Jvtyns3bxx8_kqdt8dfZDInZMr"
 
 if not os.path.exists(MODEL_PATH):
     print("Downloading model...")
-    gdown.download(MODEL_URL, MODEL_PATH, quiet=False)
+    gdown.download(MODEL_URL, MODEL_PATH, quiet=True, fuzzy=True)
 
 print("Loading model...")
 model = load_model(MODEL_PATH)
@@ -46,12 +46,14 @@ class_labels = [
 # PostgreSQL (Render DB)
 # -----------------------------
 DATABASE_URL = os.environ.get("DATABASE_URL")
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL not set")
 
-db = psycopg2.connect(DATABASE_URL, sslmode='require')
-db.autocommit = True
-cursor = db.cursor()
+if DATABASE_URL:
+    db = psycopg2.connect(DATABASE_URL, sslmode='require')
+    db.autocommit = True
+    cursor = db.cursor()
+else:
+    print("⚠️ DATABASE_URL not set. Running without DB.")
+    cursor = None
 
 # -----------------------------
 # Grad-CAM
@@ -120,8 +122,12 @@ def admin():
     if not session.get('admin'):
         return redirect('/admin_login')
 
-    cursor.execute("SELECT * FROM patients ORDER BY timestamp DESC")
-    data = cursor.fetchall()
+    if cursor:
+        cursor.execute("SELECT * FROM patients ORDER BY timestamp DESC")
+        data = cursor.fetchall()
+    else:
+        data = []
+
     return render_template('admin.html', patients=data)
 
 @app.route('/admin_logout')
@@ -164,22 +170,24 @@ def predict():
     heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
     superimposed = cv2.addWeighted(orig, 0.6, heatmap, 0.4, 0)
 
-    # TEMP storage (Render resets on restart)
     upload_dir = os.path.join(app.root_path, 'uploads')
     os.makedirs(upload_dir, exist_ok=True)
 
-    scan_filename = f"scan_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
-    gradcam_filename = f"gradcam_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+
+    scan_filename = f"scan_{timestamp}.png"
+    gradcam_filename = f"gradcam_{timestamp}.png"
 
     cv2.imwrite(os.path.join(upload_dir, scan_filename), orig)
     cv2.imwrite(os.path.join(upload_dir, gradcam_filename), superimposed)
 
-    # Save DB
-    cursor.execute("""
-        INSERT INTO patients 
-        (patient_name, age, gender, smoking, scan_path, gradcam_path, prediction, confidence, stage)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-    """,(patient_name, age, gender, smoking, scan_filename, gradcam_filename, label, confidence, stage))
+    # Save to DB (safe)
+    if cursor:
+        cursor.execute("""
+            INSERT INTO patients 
+            (patient_name, age, gender, smoking, scan_path, gradcam_path, prediction, confidence, stage)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """,(patient_name, age, gender, smoking, scan_filename, gradcam_filename, label, confidence, stage))
 
     return render_template('results.html',
         prediction=label,
@@ -202,4 +210,5 @@ def uploaded_file(filename):
 # Run
 # -----------------------------
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
